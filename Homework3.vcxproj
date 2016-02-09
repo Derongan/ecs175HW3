@@ -138,10 +138,12 @@
     <ClCompile Include="graphics.cpp" />
     <ClCompile Include="list.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graphics.h" />
     <ClInclude Include="list.h" />
+    <ClInclude Include="vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="README.txt" />

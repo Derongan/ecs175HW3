@@ -35,17 +35,24 @@ void display()
 	//Misc.
 	glClear(GL_COLOR_BUFFER_BIT);
 	glLoadIdentity();
+	g->resetTransform();
+	g->clearBuffer();
+	g->clearZBuffer();
 
-	g->setColor(1, 0, 0);
+	g->setColor((double)rand() / RAND_MAX, (double)rand() / RAND_MAX, (double)rand()/RAND_MAX);
 
-	float poly[] = { 5,5,50,50,100,7,100,100,75,125,30,40,5,100,5,5 };
-
-	g->fillPolygon(poly, 7);
-
-	float poly2[] = { 5,5,100,7,100,100,5,100,5,5 };
-
-	//g->fillPolygon(poly2, 5);
+	//g->rotate(400, 200, .17);
 	
+	float triangle[] = { 
+		200,200,.1,
+		400,200,.1,
+		200,400, .1
+	};
+
+	g->fillPolygonPlanar(triangle,3);
+
+	//g->fillPolygonPlanar(triangle2,3);
+
 	glDrawPixels(g->width, g->height, GL_RGB, GL_FLOAT, g->getCurrentBuffer());
 
 	//window refresh
