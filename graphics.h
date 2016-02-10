@@ -11,6 +11,10 @@ private:
 	float *buffer;
 	float *zbuffer;
 
+	float viewPoint[3];
+	float viewUp[3];
+	float zView[3];
+
 	float resetMatrix[4][4] = {
 		{1,0,0,0},
 		{0,1,0,0},
@@ -49,4 +53,11 @@ public:
 	//Transformations
 	void rotate(float x, float y, float theta);	//Theta in radians
 	void translate(float x, float y, float z);
+
+	//3D
+	void setViewPoint(float x, float y, float z);
+	void setViewUp(float dx, float dy, float dz);
+	void setZView(float dx, float dy, float dz);
+
+	void project(float* points, int num);
 };

@@ -288,7 +288,39 @@ void graphics::fillPolygonPlanar(float *points, int num) {
 	float dx;
 	float dy;
 
+	float savedColor[3];
+
+	savedColor[0] = color[0];
+	savedColor[1] = color[1];
+	savedColor[2] = color[2];
+
 	applyTransformationMatrix(points, num);
+
+	project(points, num);
+
+
+	int oobr, oobl, oobt, oobb;
+	oobr = oobl = oobt = oobb = 0;
+	//Clip the polygon
+	for (int i = 0; i < num; i++) {
+		i1 = (i * 3);
+		if (points[i1] < 0)
+			oobl++;
+		if (points[i1] > width)
+			oobr++;
+		if (points[i1+1] < 0)
+			oobb++;
+		if (points[i1+1] > height)
+			oobt++;
+	}
+
+	//Everything is out of bounds
+	if ((oobb == num || oobt == num) && (oobr == num || oobl == num))
+		return;
+
+	//Cheat and ignore anything outside of range
+	if (oobb + oobt + oobr + oobl > 0)
+		return;
 
 	list* edgeTable = new list[this->height];
 
@@ -319,7 +351,8 @@ void graphics::fillPolygonPlanar(float *points, int num) {
 		else
 			xmin = points[i1];
 		int test = (int)ceil((fmin(points[i1 + 1], points[i2 + 1]) - .5));
-		edgeTable[(int)ceil((fmin(points[i1 + 1], points[i2 + 1]) - .5))].add(ceil(ymax - .5), xmin, minv, dx, dy);
+		int yval = (int)ceil((fmin(points[i1 + 1], points[i2 + 1]) - .5));
+		edgeTable[yval].add(ceil(ymax - .5), xmin, minv, dx, dy);
 	}
 
 	//Find the cross product of two of the vectors
@@ -357,8 +390,10 @@ void graphics::fillPolygonPlanar(float *points, int num) {
 				int r = ceilf(last - .5);
 				float z = ((-A*r) - B*i - D) / C;
 				for (r; r + .5 < bucket->xmin; r++) {
-					if (zbuffer[i*this->width + r] > z) {
+					if (zbuffer[i*this->width + r] >= z) {
 						zbuffer[i*this->width + r] = z;
+						float modif = fmin(fmax(1 - z, 1 - z + .1), 1.0);
+						setColor(modif*savedColor[0], modif*savedColor[1], modif*savedColor[2]);
 						setPixel(r, i);
 					}
 					z -= A / C;
@@ -374,6 +409,7 @@ void graphics::fillPolygonPlanar(float *points, int num) {
 		}
 	}
 
+	setColor(savedColor[0], savedColor[1], savedColor[2]);
 	delete[] edgeTable;
 }
 
@@ -453,4 +489,35 @@ void graphics::translate(float x, float y, float z)
 	};
 
 	addTransform(translate);
+}
+
+void graphics::setViewPoint(float x, float y, float z)
+{
+	viewPoint[0] = x;
+	viewPoint[1] = y;
+	viewPoint[2] = z;
+}
+
+void graphics::setViewUp(float dx, float dy, float dz)
+{
+	viewUp[0] = dx;
+	viewUp[1] = dy;
+	viewUp[2] = dz;
+}
+
+void graphics::setZView(float dx, float dy, float dz)
+{
+	zView[0] = dx;
+	zView[1] = dy;
+	zView[2] = dz;
+}
+
+void graphics::project(float* points, int num)
+{
+	float zvp = -1;
+	for (int i = 0; i < num; i++) {
+		int i1 = i * 3;
+		points[i1] = points[i1] * (viewPoint[2] / (viewPoint[2] - points[i1 + 2])) + viewPoint[0] * (-points[i1 + 2] / (viewPoint[2] - points[i1 + 2]));
+		points[i1+1] = points[i1+1] * (viewPoint[2] / (viewPoint[2] - points[i1 + 2])) + viewPoint[1] * (-points[i1 + 2] / (viewPoint[2] - points[i1 + 2]));
+	}
 }
